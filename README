@@ -1,0 +1,47 @@
+
+Name...: fgets_sse2
+Author.: Jens Steube
+Version: v0.01
+License: GPLv2
+
+There are a few differences to fgets(3):
+
+1. Uses a context buffer type instead if *char
+2. Returns *next_t instead of *char
+3. Does not add \0 after the last character
+
+The next_t struct contains the offset and the length to the next word.
+
+- This saves the user to do strlen()
+- Which saves the function to add \0
+
+Demo:
+
+1. Run make
+2. Search a textfile, like rockyou.txt or even bigger
+3. Compare
+
+root@sf:~/fgets_sse2# cat rockyou.txt > /dev/null ## this should cache your dictionary in RAM
+
+root@sf:~/fgets_sse2# time ./fgets_orig < rockyou.txt 
+
+real    0m0.753s
+user    0m0.724s
+sys     0m0.028s
+
+root@sf:~/fgets_sse2# time ./fgets_sse2 < rockyou.txt 
+
+real    0m0.186s
+user    0m0.140s
+sys     0m0.044s
+
+Proofes that this is ~4 times faster (thanks to SSE2) than glibc fgets(3) on Ubuntu 12.04.1 lts.
+
+4. Check for "correctness" - uncomment demo2 in main.c and recompile:
+
+root@sf:~/fgets_sse2# ./fgets_sse2 < rockyou.txt | md5sum
+9076652d8ae75ce713e23ab09e10d9ee  -
+
+root@sf:~/fgets_sse2# cat < rockyou.txt | md5sum
+9076652d8ae75ce713e23ab09e10d9ee  -
+
